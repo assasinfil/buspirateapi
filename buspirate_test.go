@@ -1,13 +1,13 @@
-package main
+package buspirateapi
 
 import (
-	"buspirateapi/buspirate"
 	"fmt"
 	"go.bug.st/serial"
 	"log"
+	"testing"
 )
 
-func main() {
+func TestI2C_Read(t *testing.T) {
 	ports, err := serial.GetPortsList()
 	if err != nil {
 		log.Fatal(err)
@@ -22,13 +22,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	bp := buspirate.NewBusPirate(s)
+	bp := NewBusPirate(s)
 	err = bp.Connect()
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
-	err = bp.SwitchMode(buspirate.I2C_MODE, []byte{buspirate.S400KHZ, buspirate.I2C_POWER | buspirate.I2C_PULLUPS, buspirate.V3V})
+	err = bp.SwitchMode(I2C_MODE, []byte{S400KHZ, I2C_POWER | I2C_PULLUPS, V3V})
 	if err != nil {
 		log.Fatalln(err)
 		return
@@ -40,13 +40,16 @@ func main() {
 	}
 	data := make([]byte, 1)
 	_, err = bp.Transport.Read(0x21, data)
-	log.Println(data)
-
+	if data[0] != 0x9 {
+		t.Fatal("Expected 0x9, got", data[0])
+	}
 	err = bp.Transport.Write([]byte{0x20, 0x00, 0x17})
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
 	_, err = bp.Transport.Read(0x21, data)
-	log.Println(data)
+	if data[0] != 0x89 {
+		t.Fatal("Expected 0x89, got", data[0])
+	}
 }

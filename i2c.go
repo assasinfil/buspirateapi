@@ -1,4 +1,4 @@
-package buspirate
+package buspirateapi
 
 import (
 	"errors"
