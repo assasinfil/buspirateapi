@@ -1,4 +1,4 @@
-module github.com/assasinfil/buspirateapi
+module assasinfil/buspirateapi
 
 go 1.22
 
