@@ -1,4 +1,4 @@
-package buspirateapi
+package main
 
 import (
 	"fmt"
