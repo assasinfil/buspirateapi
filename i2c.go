@@ -18,10 +18,10 @@ const (
 )
 
 const (
-	S5KHZ   = 0x00
-	S50KHZ  = 0x01
-	S100KHZ = 0x02
-	S400KHZ = 0x03
+	BpS5KHZ   = 0x00
+	BpS50KHZ  = 0x01
+	BpS100KHZ = 0x02
+	BpS400KHZ = 0x03
 )
 
 const (

@@ -28,7 +28,7 @@ func TestI2C_Read(t *testing.T) {
 		log.Fatalln(err)
 		return
 	}
-	err = bp.SwitchMode(BpI2CMode, []byte{S400KHZ, BpI2CPower | BpI2CPullUps, BpV3V})
+	err = bp.SwitchMode(BpI2CMode, []byte{BpS400KHZ, BpI2CPower | BpI2CPullUps, BpV3V})
 	if err != nil {
 		log.Fatalln(err)
 		return
