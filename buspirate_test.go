@@ -1,4 +1,4 @@
-package main
+package buspirate
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func TestI2C_Read(t *testing.T) {
 		log.Fatalln(err)
 		return
 	}
-	err = bp.SwitchMode(I2C_MODE, []byte{S400KHZ, I2C_POWER | I2C_PULLUPS, V3V})
+	err = bp.SwitchMode(BpI2CMode, []byte{S400KHZ, BpI2CPower | BpI2CPullUps, BpV3V})
 	if err != nil {
 		log.Fatalln(err)
 		return

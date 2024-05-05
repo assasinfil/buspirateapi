@@ -1,4 +1,4 @@
-package main
+package buspirate
 
 import (
 	"errors"
@@ -18,32 +18,32 @@ const (
 )
 
 const (
-	COMMAND_RESET   = 0x00 //Reset, responds "BBIO1"
-	COMMAND_SPI     = 0x01 //Enter binary SPI mode, responds "SPI1"
-	COMMAND_I2C     = 0x02 //Enter binary I2C mode, responds "I2C1"
-	COMMAND_UART    = 0x03 //Enter binary UART mode, responds "ART1"
-	COMMAND_1WIRE   = 0x04 //Enter binary 1-Wire mode, responds "1W01"
-	COMMAND_RAW     = 0x05 //Enter binary raw-wire mode, responds "RAW1"
-	COMMAND_JTAG    = 0x06 //Enter OpenOCD JTAG mode
-	COMMAND_RESETBP = 0x0F //Reset Bus Pirate
-	COMMAND_STEST   = 0x10 //Bus Pirate self-test short
-	COMMAND_LTEST   = 0x11 //Bus Pirate self-test long
-	COMMAND_PWM     = 0x12 //Setup pulse-width modulation (requires 5 byte setup)
-	COMMAND_CPWM    = 0x13 //Clear/disable PWM
-	COMMAND_VPM     = 0x14 //Take voltage probe measurement (returns 2 bytes)
-	COMMAND_CVPM    = 0x15 //Continuous voltage probe measurement
-	COMMAND_FMA     = 0x16 //Frequency measurement on AUX pin
-	COMMAND_PINSIO  = 0x40 //Configure pins as input(1) or output(0): AUX|MOSI|CLK|MISO|CS
-	COMMAND_PINSPW  = 0x80 //Set on (1) or off (0): POWER|PULLUP|AUX|MOSI|CLK|MISO|CS
+	commandReset   = 0x00 //Reset, responds "BBIO1"
+	commandSpi     = 0x01 //Enter binary SPI mode, responds "SPI1"
+	commandI2C     = 0x02 //Enter binary I2C mode, responds "I2C1"
+	commandUart    = 0x03 //Enter binary UART mode, responds "ART1"
+	command1WIRE   = 0x04 //Enter binary 1-Wire mode, responds "1W01"
+	commandRaw     = 0x05 //Enter binary raw-wire mode, responds "RAW1"
+	commandJtag    = 0x06 //Enter OpenOCD JTAG mode
+	commandResetbp = 0x0F //Reset Bus Pirate
+	commandStest   = 0x10 //Bus Pirate self-test short
+	commandLtest   = 0x11 //Bus Pirate self-test long
+	commandPwm     = 0x12 //Setup pulse-width modulation (requires 5 byte setup)
+	commandCpwm    = 0x13 //Clear/disable PWM
+	commandVpm     = 0x14 //Take voltage probe measurement (returns 2 bytes)
+	commandCvpm    = 0x15 //Continuous voltage probe measurement
+	commandFma     = 0x16 //Frequency measurement on AUX pin
+	commandPinsio  = 0x40 //Configure pins as input(1) or output(0): AUX|MOSI|CLK|MISO|CS
+	commandPinspw  = 0x80 //Set on (1) or off (0): POWER|PULLUP|AUX|MOSI|CLK|MISO|CS
 )
 
 const (
-	SPI_MODE     = COMMAND_SPI
-	I2C_MODE     = COMMAND_I2C
-	UART_MODE    = COMMAND_UART
-	ONEWIRE_MODE = COMMAND_1WIRE
-	RAW_MODE     = COMMAND_RAW
-	JTAG_MODE    = COMMAND_JTAG
+	BpSpiMode     = commandSpi
+	BpI2CMode     = commandI2C
+	BpUartMode    = commandUart
+	BpOneWireMode = command1WIRE
+	BpRawMode     = commandRaw
+	BpJTAGMode    = commandJtag
 )
 
 type Transport interface {
@@ -74,7 +74,7 @@ func (b *BusPirate) Connect() error {
 	fmt.Print("Connecting to Bus Pirate")
 	for i := 0; i < 30; i++ {
 		fmt.Print(".")
-		if err := b.SendCommand(COMMAND_RESET); err == nil {
+		if err := b.SendCommand(commandReset); err == nil {
 			res, err := b.ReadResponse(5)
 			if err == nil {
 				if string(res) == "BBIO1" {
@@ -129,8 +129,8 @@ func (b *BusPirate) sendMode(mode byte) error {
 
 func (b *BusPirate) SwitchMode(mode byte, params []byte) error {
 	switch mode {
-	case I2C_MODE:
-		if err := b.sendMode(COMMAND_I2C); err == nil {
+	case BpI2CMode:
+		if err := b.sendMode(commandI2C); err == nil {
 			b.Transport = NewI2C(b, params)
 		}
 	}
@@ -143,17 +143,17 @@ func (b *BusPirate) SwitchMode(mode byte, params []byte) error {
 
 func responseForMode(mode byte) string {
 	switch mode {
-	case SPI_MODE:
+	case BpSpiMode:
 		return "SPI1"
-	case I2C_MODE:
+	case BpI2CMode:
 		return "I2C1"
-	case UART_MODE:
+	case BpUartMode:
 		return "ART1"
-	case ONEWIRE_MODE:
+	case BpOneWireMode:
 		return "1W01"
-	case RAW_MODE:
+	case BpRawMode:
 		return "RAW1"
-	case JTAG_MODE:
+	case BpJTAGMode:
 		return "JTAG1"
 	}
 	return "Unknown mode"

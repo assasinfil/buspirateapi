@@ -1,4 +1,4 @@
-package main
+package buspirate
 
 import (
 	"errors"
@@ -6,15 +6,15 @@ import (
 )
 
 const (
-	V3V = 0x01
-	V5V = 0x02
+	BpV3V = 0x01
+	BpV5V = 0x02
 )
 
 const (
-	I2C_CS      = 0x01
-	I2C_AUX     = 0x02
-	I2C_PULLUPS = 0x04
-	I2C_POWER   = 0x08
+	BpI2CCs      = 0x01
+	BpI2CAux     = 0x02
+	BpI2CPullUps = 0x04
+	BpI2CPower   = 0x08
 )
 
 const (
@@ -25,19 +25,19 @@ const (
 )
 
 const (
-	COMMAND_EXIT  = 0x00 //Exit to bitbang mode, responds "BBIOx"
-	COMMAND_MODE  = 0x01 //Display mode version string, responds "I2Cx"
-	COMMAND_START = 0x02 //I2C start bit
-	COMMAND_STOP  = 0x03 //I2C stop bit
-	COMMAND_READ  = 0x04 //I2C read byte
-	COMMAND_ACK   = 0x06 //ACK bit
-	COMMAND_NACK  = 0x07 //NACK bit
-	COMMAND_SNIFF = 0x0F //Start bus sniffer
-	COMMAND_WRITE = 0x10 //Bulk I2C write, send 1-16 bytes (0=1byte!)
-	COMMAND_CONF  = 0x40 //Configure peripherals w=power, x=pullups, y=AUX, z=CS
-	COMMAND_PULL  = 0x50 //Pull up voltage select (BPV4 only)- x=5v y=3.3v
-	COMMAND_SPEED = 0x60 //Set I2C speed, 3=~400kHz, 2=~100kHz, 1=~50kHz, 0=~5kHz
-	COMMAND_WTR   = 0x08 //Write then read
+	commandExit  = 0x00 //Exit to bitbang mode, responds "BBIOx"
+	commandMode  = 0x01 //Display mode version string, responds "I2Cx"
+	commandStart = 0x02 //I2C start bit
+	commandStop  = 0x03 //I2C stop bit
+	commandRead  = 0x04 //I2C read byte
+	commandAck   = 0x06 //ACK bit
+	commandNack  = 0x07 //NACK bit
+	commandSniff = 0x0F //Start bus sniffer
+	commandWrite = 0x10 //Bulk I2C write, send 1-16 bytes (0=1byte!)
+	commandConf  = 0x40 //Configure peripherals w=power, x=pullups, y=AUX, z=CS
+	commandPull  = 0x50 //Pull up voltage select (BPV4 only)- x=5v y=3.3v
+	commandSpeed = 0x60 //Set I2C speed, 3=~400kHz, 2=~100kHz, 1=~50kHz, 0=~5kHz
+	commandWtr   = 0x08 //Write then read
 )
 
 type I2C struct {
@@ -62,7 +62,7 @@ func NewI2C(bp *BusPirate, params []byte) *I2C {
 }
 
 func (v *I2C) SetSpeed(speed byte) error {
-	err := v.bp.SendCommand(COMMAND_SPEED | speed)
+	err := v.bp.SendCommand(commandSpeed | speed)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (v *I2C) SetSpeed(speed byte) error {
 }
 
 func (v *I2C) SetPullUpVoltage(volts byte) error {
-	err := v.bp.SendCommand(COMMAND_PULL | volts)
+	err := v.bp.SendCommand(commandPull | volts)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (v *I2C) SetPullUpVoltage(volts byte) error {
 }
 
 func (v *I2C) ConfigPins(pins byte) error {
-	err := v.bp.SendCommand(COMMAND_CONF | pins)
+	err := v.bp.SendCommand(commandConf | pins)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func (v *I2C) ConfigPins(pins byte) error {
 }
 
 func (v *I2C) sendStart() error {
-	err := v.bp.SendCommand(COMMAND_START)
+	err := v.bp.SendCommand(commandStart)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (v *I2C) sendStart() error {
 }
 
 func (v *I2C) sendStop() error {
-	err := v.bp.SendCommand(COMMAND_STOP)
+	err := v.bp.SendCommand(commandStop)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func (v *I2C) write(data []byte) error {
 	if len(data) > 0xF {
 		return errors.New("data is too long")
 	}
-	if err := v.bp.SendCommand(COMMAND_WRITE | byte(len(data)-1)); err != nil {
+	if err := v.bp.SendCommand(commandWrite | byte(len(data)-1)); err != nil {
 		return err
 	}
 	time.Sleep(10 * time.Millisecond)
@@ -218,7 +218,7 @@ func (v *I2C) Read(address byte, data []byte) (int, error) {
 }
 
 func (v *I2C) sendAck() ([]byte, error) {
-	_, err := v.bp.device.Write([]byte{COMMAND_ACK})
+	_, err := v.bp.device.Write([]byte{commandAck})
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +226,7 @@ func (v *I2C) sendAck() ([]byte, error) {
 }
 
 func (v *I2C) sendNAck() ([]byte, error) {
-	_, err := v.bp.device.Write([]byte{COMMAND_NACK})
+	_, err := v.bp.device.Write([]byte{commandNack})
 	if err != nil {
 		return nil, err
 	}
